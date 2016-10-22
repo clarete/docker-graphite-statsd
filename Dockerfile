@@ -74,7 +74,7 @@ ADD conf/etc/service/nginx/run /etc/service/nginx/run
 # Remove syslog-ng and get rsyslog going
 RUN rm -rf /etc/service/syslog-forwarder /etc/service/syslog-ng /etc/syslog-ng && \
   find /etc/ -name 'syslog-ng*' -delete
-RUN mkdir -p /var/spool/rsyslog
+RUN rm /var/log/syslog && mkdir -p /var/spool/rsyslog /var/log/syslog
 ADD conf/etc/service/rsyslog/rsyslog.conf /etc/rsyslog.conf
 ADD conf/etc/service/rsyslog/run /etc/service/rsyslog/run
 RUN service rsyslog restart
