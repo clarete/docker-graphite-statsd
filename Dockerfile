@@ -7,6 +7,7 @@ RUN apt-get -y update\
 
 # dependencies
 RUN apt-get -y --force-yes install vim\
+ rsyslog\
  nginx\
  python-dev\
  python-flup\
@@ -70,6 +71,14 @@ ADD conf/etc/service/graphite/run /etc/service/graphite/run
 ADD conf/etc/service/statsd/run /etc/service/statsd/run
 ADD conf/etc/service/nginx/run /etc/service/nginx/run
 
+# Remove syslog-ng and get rsyslog going
+RUN rm -rf /etc/service/syslog-forwarder /etc/service/syslog-ng /etc/syslog-ng && \
+  find /etc/ -name 'syslog-ng*' -delete
+RUN mkdir -p /var/spool/rsyslog
+ADD conf/etc/service/rsyslog/rsyslog.conf /etc/rsyslog.conf
+ADD conf/etc/service/rsyslog/run /etc/service/rsyslog/run
+RUN service rsyslog restart
+
 # default conf setup
 ADD conf /etc/graphite-statsd/conf
 ADD conf/etc/my_init.d/01_conf_init.sh /etc/my_init.d/01_conf_init.sh
@@ -79,7 +88,7 @@ RUN apt-get clean\
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # defaults
-EXPOSE 80 2003-2004 2023-2024 8125/udp 8126
+EXPOSE 80 2003-2004 2023-2024 8125/udp 8126 514 514/udp
 VOLUME ["/opt/graphite/conf", "/opt/graphite/storage", "/etc/nginx", "/opt/statsd", "/etc/logrotate.d", "/var/log"]
 WORKDIR /
 ENV HOME /root
